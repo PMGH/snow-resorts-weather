@@ -5,6 +5,7 @@ var createMap = function(){
   var center = { lat: 56.740674, lng: -4.2187500 };
   var zoom = 7;
   var map = new MapWrapper(container, center, zoom);
+  map.userLocation();
 }
 
 var app = function(){
