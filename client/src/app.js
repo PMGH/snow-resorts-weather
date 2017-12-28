@@ -6,6 +6,16 @@ var createMap = function(){
   var zoom = 7;
   var map = new MapWrapper(container, center, zoom);
   map.userLocation();
+  createMapSearchBoxInput(map);
+}
+
+var createMapSearchBoxInput = function(map){
+  var input = document.createElement("input");
+  input.id = "search-input";
+  input.class = "controls";
+  input.type = "text";
+  input.placeholder = "Search for a location";
+  map.createSearchBox(input);
 }
 
 var app = function(){
