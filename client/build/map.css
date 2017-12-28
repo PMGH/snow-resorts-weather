@@ -1,0 +1,14 @@
+/* section for map and search functionality */
+#map-container {
+  height: 85vh;
+  width: 60%;
+}
+
+/* map search bar */
+#search-input {
+  border: 1px solid lightgrey;
+  height: 24px;
+  margin: 10px;
+  padding-left: 5px;
+  width: 50%;
+}
