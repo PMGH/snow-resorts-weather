@@ -1,0 +1,31 @@
+#list-container {
+  background-color: lightgrey;
+  overflow: scroll;
+}
+
+#list-header {
+  background-color: #FDFDFD;
+  font-size: 36px;
+  font-weight: bold;
+  padding: 14px;
+}
+
+.region-list-item {
+  align-items: center;
+  background-color: #FDFDFD;
+  border: 1px solid #8F979A;
+  border-radius: 3px;
+  display: flex;
+  font-size: 18px;
+  font-weight: bold;
+  height: 40px;
+  margin: 4px;
+  padding-left: 10px;
+  transition: background-color 1.1s;
+}
+
+.region-list-item:hover {
+  color: #FDFDFD;
+  background-color: #2D609E;
+  cursor: pointer;
+}

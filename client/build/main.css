@@ -1,3 +1,7 @@
+body {
+  margin: 0;
+}
+
 main {
   display: flex;
   flex-flow: row wrap;
@@ -14,25 +18,7 @@ main {
 }
 
 #list-view-section {
-  width: 39%;
-  overflow: scroll;
+  width: 39.6%;
   display: flex;
   flex-direction: column;
-}
-
-.region-list-item {
-  align-content: center;
-  align-items: center;
-  background-color: #FDFDFD;
-  border: 1px solid lightgrey;
-  font-size: 18px;
-  font-weight: bold;
-  height: 40px;
-  padding-left: 10px;
-  transition: background-color 1.1s;
-}
-
-.region-list-item:hover {
-  background-color: #b7d6c7;
-  cursor: pointer;
 }
