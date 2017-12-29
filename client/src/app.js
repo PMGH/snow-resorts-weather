@@ -11,7 +11,24 @@ var skiMapRequestComplete = function(){
   var jsonString = this.responseText;
   var apiData = JSON.parse(jsonString);
   console.log(apiData);
+  plotResortMarkers(apiData);
   populateRegionList(apiData);
+};
+
+// populate map with resort markers
+var plotResortMarkers = function(apiData){
+  apiData.forEach(function(area){
+    var region = (area.Region[0] != undefined) ? area.Region[0].name : "No region data";
+    var skiArea = {
+      region: region,
+      name: area.SkiArea.name,
+      location: {
+        lat: parseFloat(area.SkiArea.geo_lat),
+        lng: parseFloat(area.SkiArea.geo_lng)
+      }
+    }
+    map.addMarker(skiArea);
+  });
 };
 
 var getRegions = function(apiData){
@@ -44,7 +61,7 @@ var populateResortList = function(apiData, resortsByRegion){
   createListHeaderText('Resorts');
   var list = document.getElementById('list-container');
   for (var resort of resortsByRegion){
-    createListItem(resort.name, list, resort.name, 'resort-list-item', resortsByRegion);
+    createListItem(resort.name, list, resort.name, 'resort-list-item', resortsByRegion, resort);
   };
   scrollToListTop();
 };
@@ -101,14 +118,14 @@ var createListHeaderText = function(name){
   listHeader.appendChild(listHeaderText);
 };
 
-var createListItem = function(innerText, parent, id, className, apiData){
+var createListItem = function(innerText, parent, id, className, apiData, resort){
   var item = createElement('div', id, className);
   item.innerText = innerText;
-  addListener(item, innerText, className, apiData);
+  addListener(item, innerText, className, apiData, resort);
   parent.appendChild(item);
 };
 
-var addListener = function(item, name, className, apiData){
+var addListener = function(item, name, className, apiData, resort){
   if (className === 'region-list-item'){
     item.addEventListener('click', function(){
       console.log('region clicked');
@@ -121,7 +138,12 @@ var addListener = function(item, name, className, apiData){
     item.addEventListener('click', function(){
       console.log('resort clicked');
       // request weather (callback: display weather)
+      
+      // navigate to location on map
+      map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
+
       // expand div and show additional resort details
+
       // display link to most recent piste map
     });
   };
@@ -139,7 +161,7 @@ var createMap = function(){
   var container = document.getElementById('map-container');
   var center = { lat: 56.740674, lng: -4.2187500 };
   var zoom = 7;
-  var map = new MapWrapper(container, center, zoom);
+  map = new MapWrapper(container, center, zoom);
   map.userLocation();
   createMapSearchBoxInput(map);
 };
