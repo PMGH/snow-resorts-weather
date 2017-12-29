@@ -27,33 +27,94 @@ var getRegions = function(apiData){
 };
 
 var populateRegionList = function(apiData){
-  var listHeader = document.getElementById('list-header');
+  clearListSection();
+  createListHeaderText('Regions');
   var list = document.getElementById('list-container');
   var regions = getRegions(apiData);
   console.log(regions);
-  listHeader.innerText = 'Regions';
   for (var region of regions){
-    createListItem(region, list, region, 'region-list-item');
+    createListItem(region, list, region, 'region-list-item', apiData);
+  };
+  scrollToListTop();
+};
+
+var populateResortList = function(apiData, resortsByRegion){
+  clearListSection();
+  createListBackButton(apiData);
+  createListHeaderText('Resorts');
+  var list = document.getElementById('list-container');
+  for (var resort of resortsByRegion){
+    createListItem(resort.name, list, resort.name, 'resort-list-item', resortsByRegion);
+  };
+  scrollToListTop();
+};
+
+var trimDataSet = function(apiData, region){
+  var trimmedDataSet = [];
+  for(var resort of apiData){
+    if ((resort.Region[0] != undefined) && (resort.Region[0].name === region)){ trimmedDataSet.push(resort.SkiArea); }
+  };
+  trimmedDataSet.sort(compareValues('name', 'asc'));
+  return trimmedDataSet;
+};
+
+var compareValues = function (key, order='asc') {
+  // github / stack overflow help
+  return function(a, b) {
+    if(!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+      // property doesn't exist on either object
+        return 0;
+    }
+    const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
+    const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
+    let comparison = 0;
+    if (varA > varB) {
+      comparison = 1;
+    } else if (varA < varB) {
+      comparison = -1;
+    }
+    return ((order == 'desc') ? (comparison * -1) : comparison );
   };
 };
 
-var populateResortList = function(region){
+var clearListSection = function(){
+  var listHeader = document.getElementById('list-header');
+  var list = document.getElementById('list-container');
+  removeChildNodes(listHeader);
+  removeChildNodes(list);
 };
 
-var createListItem = function(name, parent, id, className){
-  var item = createElement('div');
-  if (id !== undefined){ item.id = id; }
-  item.className = className;
-  item.innerText = name;
-  addListener(item, name, className);
+var createListBackButton = function(apiData){
+  var listHeader = document.getElementById('list-header');
+  var backButton = createElement('div', 'resorts-back-button');
+  backButton.innerText = '<';
+  backButton.addEventListener('click', function(){
+    populateRegionList(apiData);
+  });
+  listHeader.appendChild(backButton);
+};
+
+var createListHeaderText = function(name){
+  var listHeader = document.getElementById('list-header');
+  var listHeaderText = createElement('div', 'list-header-text');
+  listHeaderText.innerText = name;
+  listHeader.appendChild(listHeaderText);
+};
+
+var createListItem = function(innerText, parent, id, className, apiData){
+  var item = createElement('div', id, className);
+  item.innerText = innerText;
+  addListener(item, innerText, className, apiData);
   parent.appendChild(item);
 };
 
-var addListener = function(item, name, className){
+var addListener = function(item, name, className, apiData){
   if (className === 'region-list-item'){
     item.addEventListener('click', function(){
       console.log('region clicked');
-      populateResortList(name);
+      var resortsByRegion = trimDataSet(apiData, name);
+      console.log(resortsByRegion);
+      populateResortList(apiData, resortsByRegion);
     });
   };
   if (className === 'resort-list-item'){
@@ -66,8 +127,10 @@ var addListener = function(item, name, className){
   };
 };
 
-var createElement = function(element){
+var createElement = function(element, id, className){
   var newElement = document.createElement(element);
+  if (id !== undefined){ newElement.id = id; }
+  if (className !== undefined){ newElement.className = className; }
   return newElement;
 };
 
@@ -82,12 +145,15 @@ var createMap = function(){
 };
 
 var createMapSearchBoxInput = function(map){
-  var input = document.createElement('input');
-  input.id = 'search-input';
-  input.class = 'controls';
+  var input = createElement('input', 'search-input', 'controls');
   input.type = 'text';
   input.placeholder = 'Search for a location';
   map.createSearchBox(input);
+};
+
+var scrollToListTop = function(){
+  var list = document.getElementById('list-container');
+  list.scrollTo(0, 0);
 };
 
 var removeChildNodes = function(node){
