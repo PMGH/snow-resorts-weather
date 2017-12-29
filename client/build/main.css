@@ -1,0 +1,24 @@
+body {
+  margin: 0;
+}
+
+main {
+  display: flex;
+  flex-flow: row wrap;
+  width: 100%;
+}
+
+#google-map-section, #list-view-section {
+  border: 1px solid lightgrey;
+  height: 700px;
+}
+
+#google-map-section {
+  width: 60%;
+}
+
+#list-view-section {
+  width: 39.6%;
+  display: flex;
+  flex-direction: column;
+}
