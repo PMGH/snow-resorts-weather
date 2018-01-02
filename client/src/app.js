@@ -5,7 +5,7 @@ var makeRequest = function(url, callback){
   request.send();
 };
 
-var skiMapRequestComplete = function(){
+var dbRequestComplete = function(){
   if (this.status != 200){ return console.log('request failed') }
   console.log('request successful');
   var jsonString = this.responseText;
@@ -138,7 +138,7 @@ var addListener = function(item, name, className, apiData, resort){
     item.addEventListener('click', function(){
       console.log('resort clicked');
       // request weather (callback: display weather)
-      
+
       // navigate to location on map
       map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
 
@@ -186,8 +186,8 @@ var removeChildNodes = function(node){
 
 var app = function(){
   console.log('app running');
-  var url = "https://skimap.org/SkiAreas/index.json";
-  makeRequest(url, skiMapRequestComplete);
+  var url = "http://localhost:3000/resorts";
+  makeRequest(url, dbRequestComplete);
   createMap();
 };
 
