@@ -22,3 +22,34 @@ MongoClient.connect('mongodb://localhost:27017/snow_resorts', function(err, clie
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/client/build/index.html');
 });
+
+app.get('/regions', function(req, res){
+  db.collection("regions").find().toArray(function(err, results){
+    if(err){ return console.log(err); }
+    res.json(results);
+  });
+});
+
+app.get('/resorts', function(req, res){
+  db.collection("resorts").find().toArray(function(err, results){
+    if(err){ return console.log(err); }
+    res.json(results);
+  });
+});
+
+app.get('/resorts/:resort', function(req, res){
+  var resort = { 'SkiArea.name': { $eq: req.params.resort } }
+  db.collection("resorts").find(resort).toArray(function(err, results){
+    if(err){ return console.log(err); }
+    res.json(results);
+  });
+});
+
+app.get('/resortsByRegion/:region', function(req, res){
+  var resort = { 'Region.0.name': { $eq: req.params.region } }
+  console.log(resort);
+  db.collection('resorts').find(resort).toArray(function(err, results){
+    if(err){ return console.log(err); }
+    res.json(results);
+  });
+});
