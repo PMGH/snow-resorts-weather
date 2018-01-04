@@ -8,6 +8,14 @@ main {
   width: 100%;
 }
 
+h1 {
+  border: 1px solid #8F979A;
+  display: flex;
+  padding: 3vh;
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+}
+
 #google-map-section, #list-view-section {
   border: 1px solid lightgrey;
   height: 700px;
