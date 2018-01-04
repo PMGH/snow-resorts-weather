@@ -6,7 +6,7 @@ var makeRequest = function(url, callback){
 };
 
 var dbRequestComplete = function(){
-  if (this.status != 200){ return console.log('request failed') }
+  if (this.status !== 200){ return console.log('request failed') }
   console.log('request successful');
   var jsonString = this.responseText;
   var apiData = JSON.parse(jsonString);
@@ -15,10 +15,9 @@ var dbRequestComplete = function(){
   populateRegionList(apiData);
 };
 
-// populate map with resort markers
 var plotResortMarkers = function(apiData){
   apiData.forEach(function(area){
-    var region = (area.Region[0] != undefined) ? area.Region[0].name : "No region data";
+    var region = (area.Region[0] !== undefined) ? area.Region[0].name : "No region data";
     var skiArea = {
       region: region,
       name: area.SkiArea.name,
@@ -35,7 +34,7 @@ var getRegions = function(apiData){
   var regions = [];
   for(var resort of apiData){
     var region = resort.Region[0];
-    if (region != undefined){
+    if (region !== undefined){
       if (!regions.includes(region.name)){ regions.push(region.name); }
     };
   };
@@ -48,7 +47,6 @@ var populateRegionList = function(apiData){
   createListHeaderText('Regions');
   var list = document.getElementById('list-container');
   var regions = getRegions(apiData);
-  console.log(regions);
   for (var region of regions){
     createListItem(region, list, region, 'region-list-item', apiData);
   };
@@ -69,19 +67,15 @@ var populateResortList = function(apiData, resortsByRegion){
 var trimDataSet = function(apiData, region){
   var trimmedDataSet = [];
   for(var resort of apiData){
-    if ((resort.Region[0] != undefined) && (resort.Region[0].name === region)){ trimmedDataSet.push(resort.SkiArea); }
+    if ((resort.Region[0] !== undefined) && (resort.Region[0].name === region)){ trimmedDataSet.push(resort.SkiArea); }
   };
   trimmedDataSet.sort(compareValues('name', 'asc'));
   return trimmedDataSet;
 };
 
 var compareValues = function (key, order='asc') {
-  // github / stack overflow help
   return function(a, b) {
-    if(!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-      // property doesn't exist on either object
-        return 0;
-    }
+    if(!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) { return 0; }
     const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
     const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
     let comparison = 0;
@@ -89,7 +83,7 @@ var compareValues = function (key, order='asc') {
       comparison = 1;
     } else if (varA < varB) {
       comparison = -1;
-    }
+    };
     return ((order == 'desc') ? (comparison * -1) : comparison );
   };
 };
@@ -127,26 +121,62 @@ var createListItem = function(innerText, parent, id, className, apiData, resort)
 
 var addListener = function(item, name, className, apiData, resort){
   if (className === 'region-list-item'){
-    item.addEventListener('click', function(){
-      console.log('region clicked');
-      var resortsByRegion = trimDataSet(apiData, name);
-      console.log(resortsByRegion);
-      populateResortList(apiData, resortsByRegion);
-    });
+    addRegionListener(item, name, apiData);
   };
   if (className === 'resort-list-item'){
-    item.addEventListener('click', function(){
-      console.log('resort clicked');
-      // request weather (callback: display weather)
-
-      // navigate to location on map
-      map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
-
-      // expand div and show additional resort details
-
-      // display link to most recent piste map
-    });
+    addResortListener(item, name, resort);
   };
+};
+
+var addRegionListener = function(item, name, apiData){
+  item.addEventListener('click', function(){
+    console.log('region clicked');
+    var resortsByRegion = trimDataSet(apiData, name);
+    populateResortList(apiData, resortsByRegion);
+  });
+};
+
+var addResortListener = function(item, name, resort){
+  item.addEventListener('click', function(){
+    var url = generateWeatherRequestURL(resort);
+    console.log('Weather request url: ', url);
+    makeWeatherRequest(url, weatherRequestComplete);
+    map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
+    // TODO: expand div and show additional resort details
+    // TODO: display link to most recent piste map
+  });
+};
+
+var makeWeatherRequest = function(url, callback){
+  var request = new XMLHttpRequest();
+  request.open('GET', url);
+  request.addEventListener('load', callback);
+  request.send();
+};
+
+var generateWeatherRequestURL = function(resort){
+  var name = resort.name;
+  var lat = resort.geo_lat;
+  var lng = resort.geo_lng;
+  var reportDays = 2;
+  console.log("Preparing request for: ", name);
+  var url = `https://api.worldweatheronline.com/premium/v1/ski.ashx?key=ebbbfe3e5f59416284e222010170812&q=${lat},${lng}&num_of_days=${reportDays}&includeLocation=no&format=json`;
+  return url;
+};
+
+var weatherRequestComplete = function(resort){
+  console.log(resort);
+  if (this.status !== 200){ return console.log('Weather request failed, this.status: ', this.status); }
+  console.log('Weather request successful');
+  var jsonString = this.responseText;
+  var apiData = JSON.parse(jsonString);
+  var weather = apiData.data.weather;
+  console.log(weather);
+};
+
+var appendWeatherToListItem = function(item, weather){
+  console.log(item);
+  console.log(weather);
 };
 
 var createElement = function(element, id, className){
@@ -179,9 +209,7 @@ var scrollToListTop = function(){
 };
 
 var removeChildNodes = function(node){
-  while (node.hasChildNodes()) {
-    node.removeChild(node.lastChild);
-  };
+  while (node.hasChildNodes()) { node.removeChild(node.lastChild); };
 };
 
 var app = function(){
