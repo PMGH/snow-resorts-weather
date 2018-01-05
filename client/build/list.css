@@ -55,3 +55,17 @@
   background-color: #2D609E;
   cursor: pointer;
 }
+
+.resort-list-item, .list-item-weather-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+}
+
+.resort-list-item-heading, .list-item-weather-container {
+  flex: 0 1 100%;
+}
+
+.list-item-weather-report {
+
+}
