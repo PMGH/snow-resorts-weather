@@ -56,7 +56,7 @@ var getRegions = function(apiData){
 var populateResortList = function(apiData, resortsByRegion){
   clearListSection();
   createListBackButton(apiData);
-  createListHeaderText('Resorts');
+  createListHeaderText('Ski Areas');
   var list = document.getElementById('list-container');
   for (var resort of resortsByRegion){
     if ((resort.geo_lat != null) && (resort.geo_lng != null)){
@@ -104,7 +104,6 @@ var addListener = function(item, name, className, apiData, resort){
 
 var addRegionListener = function(item, name, apiData){
   item.addEventListener('click', function(){
-    console.log('Region clicked');
     var resortsByRegion = trimDataSet(apiData, name);
     populateResortList(apiData, resortsByRegion);
   });
@@ -134,12 +133,9 @@ var compareValues = function (key, order='asc') {
   };
 };
 
-var collapsedContainers = [];
-var expandedContainers = [];
 var addResortListener = function(item, name, resort){
   var clicks = 0;
   item.addEventListener('click', function(){
-    console.log('Resort clicked');
     if (clicks < 1){
       clicks += 1;
       var url = generateWeatherRequestURL(resort);
@@ -154,7 +150,6 @@ var addResortListener = function(item, name, resort){
 var closeWeatherContainers = function(){
   var listContainer = document.getElementById('list-container');
   for (var listItem of listContainer.children){
-    console.log('listItem: ', listItem);
     listItem.children[1].style.display = 'none';
   }
 }
@@ -163,9 +158,8 @@ var generateWeatherRequestURL = function(resort){
   var name = resort.name;
   var lat = resort.geo_lat;
   var lng = resort.geo_lng;
-  var reportDays = 2;
+  var reportDays = 3;
   var url = `https://api.worldweatheronline.com/premium/v1/ski.ashx?key=ebbbfe3e5f59416284e222010170812&q=${lat},${lng}&num_of_days=${reportDays}&includeLocation=no&format=json`;
-  console.log(url);
   return url;
 };
 
@@ -188,18 +182,33 @@ var weatherRequestComplete = function(resort){
 
 var appendWeatherToListItem = function(resort, weather){
   var listItem = document.getElementById(resort.name);
-  var weatherContainer = createElement('div', resort.name + '-weather', 'list-item-weather-container');
+  var weatherContainer = createElement('section', resort.name + '-weather', 'list-item-weather-container');
   for (var report of weather){
     var reportContainer = createElement('div', resort.name + '-weather-' + report.date, 'list-item-weather-report');
     var date = createElement('h4', undefined, 'list-item-weather-date');
     var chanceOfSnow = createElement('h5', undefined, 'list-item-weather-chance-of-snow');
+    var temperaturesContainer = createElement('div', undefined, 'list-item-weather-temperatures');
+    var top = createElement('h5', undefined, 'list-item-weather-top');
+    var mid = createElement('h5', undefined, 'list-item-weather-mid');
+    var bottom = createElement('h5', undefined, 'list-item-weather-bottom');
+
     date.innerText = report.date;
     chanceOfSnow.innerText = `Chance of snow: ${report.chanceofsnow}%`;
+    top.innerHTML = `Top: ${report.top[0].maxtempC}<sup>oC</sup>, ${report.top[0].mintempC}<sup>oC</sup>`;
+    mid.innerHTML = `Middle: ${report.mid[0].maxtempC}<sup>oC</sup>, ${report.mid[0].mintempC}<sup>oC</sup>`;
+    bottom.innerHTML = `Bottom: ${report.bottom[0].maxtempC}<sup>oC</sup>, ${report.bottom[0].mintempC}<sup>oC</sup>`;
+
     reportContainer.appendChild(date);
     reportContainer.appendChild(chanceOfSnow);
+    temperaturesContainer.appendChild(top);
+    temperaturesContainer.appendChild(mid);
+    temperaturesContainer.appendChild(bottom);
+    reportContainer.appendChild(temperaturesContainer);
     weatherContainer.appendChild(reportContainer);
   }
   listItem.appendChild(weatherContainer);
+  listItem.style.leftPadding = '0px';
+  listItem.style.padding = '10px';
 };
 
 var createElement = function(element, id, className){
