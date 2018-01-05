@@ -186,13 +186,14 @@ var appendWeatherToListItem = function(resort, weather){
   for (var report of weather){
     var reportContainer = createElement('div', resort.name + '-weather-' + report.date, 'list-item-weather-report');
     var date = createElement('h4', undefined, 'list-item-weather-date');
+    var formattedDate = formatDate(report.date);
     var chanceOfSnow = createElement('h5', undefined, 'list-item-weather-chance-of-snow');
     var temperaturesContainer = createElement('div', undefined, 'list-item-weather-temperatures');
     var top = createElement('h5', undefined, 'list-item-weather-top');
     var mid = createElement('h5', undefined, 'list-item-weather-mid');
     var bottom = createElement('h5', undefined, 'list-item-weather-bottom');
 
-    date.innerText = report.date;
+    date.innerText = formattedDate;
     chanceOfSnow.innerText = `Chance of snow: ${report.chanceofsnow}%`;
     top.innerHTML = `Top: ${report.top[0].maxtempC}<sup>oC</sup>, ${report.top[0].mintempC}<sup>oC</sup>`;
     mid.innerHTML = `Middle: ${report.mid[0].maxtempC}<sup>oC</sup>, ${report.mid[0].mintempC}<sup>oC</sup>`;
@@ -210,6 +211,15 @@ var appendWeatherToListItem = function(resort, weather){
   listItem.style.leftPadding = '0px';
   listItem.style.padding = '10px';
 };
+
+var formatDate = function(dateString){
+  var splitStr = dateString.split('');
+  var day = `${splitStr[8]}${splitStr[9]}`;
+  var month = `${splitStr[5]}${splitStr[6]}`;
+  var year = `${splitStr[0]}${splitStr[1]}${splitStr[2]}${splitStr[3]}`;
+  var newString = `${day}-${month}-${year}`;
+  return newString;
+}
 
 var createElement = function(element, id, className){
   var newElement = document.createElement(element);
