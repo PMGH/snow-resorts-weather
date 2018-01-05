@@ -136,6 +136,7 @@ var compareValues = function (key, order='asc') {
 var addResortListener = function(item, name, resort){
   item.addEventListener('click', function(){
     closeWeatherContainers();
+    scrollToListItemTop(item);
     var url = generateWeatherRequestURL(resort);
     makeWeatherRequest(url, function(){ weatherRequestComplete.call(this, resort); });
     map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
@@ -149,6 +150,14 @@ var closeWeatherContainers = function(){
   for (var listItem of listContainer.children){
     if (listItem.children[1] !== undefined){ listItem.removeChild(listItem.childNodes[1]); }
   }
+}
+
+var scrollToListItemTop = function(item){
+  var list = document.getElementById("list-container");
+  var listTop = list.getBoundingClientRect().y;
+  var itemTop = item.getBoundingClientRect().y;
+  var diff = itemTop - listTop;
+  list.scrollTo(0, diff + list.scrollTop);
 }
 
 var simulateMarkerClick = function(resort){
