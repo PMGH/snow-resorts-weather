@@ -229,7 +229,7 @@ var formatDate = function(dateString){
   var day = `${splitStr[8]}${splitStr[9]}`;
   var month = `${splitStr[5]}${splitStr[6]}`;
   var year = `${splitStr[0]}${splitStr[1]}${splitStr[2]}${splitStr[3]}`;
-  var newString = `${day}-${month}-${year}`;
+  var newString = `${day} / ${month} / ${year}`;
   return newString;
 }
 
