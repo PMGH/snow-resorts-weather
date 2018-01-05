@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  font-family: 'Abel', sans-serif;
 }
 
 main {
@@ -9,11 +10,31 @@ main {
 }
 
 h1 {
-  border: 1px solid #8F979A;
-  display: flex;
-  padding: 3vh;
   -webkit-margin-before: 0;
   -webkit-margin-after: 0;
+}
+
+h4 {
+  -webkit-margin-before: 0.5em;
+  -webkit-margin-after: 0.5em;
+}
+
+h5 {
+  -webkit-margin-before: 0.25em;
+  -webkit-margin-after: 0.25em;
+}
+
+#site-icon {
+  height: 40px;
+  width: 40px;
+  margin-right: 10px;
+}
+
+#site-heading {
+  background-color: #2C3A43;
+  color: #00A6AA;
+  display: flex;
+  padding: 3vh;
 }
 
 #google-map-section, #list-view-section {

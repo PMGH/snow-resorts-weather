@@ -6,8 +6,8 @@ var makeRequest = function(url, callback){
 };
 
 var dbRequestComplete = function(){
-  if (this.status !== 200){ return console.log('request failed') }
-  console.log('request successful');
+  if (this.status !== 200){ return console.log('DB request failed') }
+  console.log('DB request successful');
   var jsonString = this.responseText;
   var apiData = JSON.parse(jsonString);
   console.log(apiData);
@@ -30,6 +30,17 @@ var plotResortMarkers = function(apiData){
   });
 };
 
+var populateRegionList = function(apiData){
+  clearListSection();
+  createListHeaderText('Regions');
+  var list = document.getElementById('list-container');
+  var regions = getRegions(apiData);
+  for (var region of regions){
+    createListItem(region, list, region, 'region-list-item', apiData);
+  };
+  scrollToListTop();
+};
+
 var getRegions = function(apiData){
   var regions = [];
   for(var resort of apiData){
@@ -42,26 +53,60 @@ var getRegions = function(apiData){
   return regions;
 };
 
-var populateRegionList = function(apiData){
+var populateResortList = function(apiData, resortsByRegion){
   clearListSection();
-  createListHeaderText('Regions');
+  createListBackButton(apiData);
+  createListHeaderText('Ski Areas');
   var list = document.getElementById('list-container');
-  var regions = getRegions(apiData);
-  for (var region of regions){
-    createListItem(region, list, region, 'region-list-item', apiData);
+  for (var resort of resortsByRegion){
+    if ((resort.geo_lat != null) && (resort.geo_lng != null)){
+      createListItem(resort.name, list, resort.name, 'resort-list-item', resortsByRegion, resort);
+    }
   };
   scrollToListTop();
 };
 
-var populateResortList = function(apiData, resortsByRegion){
-  clearListSection();
-  createListBackButton(apiData);
-  createListHeaderText('Resorts');
+var clearListSection = function(){
+  var listHeader = document.getElementById('list-header');
   var list = document.getElementById('list-container');
-  for (var resort of resortsByRegion){
-    createListItem(resort.name, list, resort.name, 'resort-list-item', resortsByRegion, resort);
-  };
-  scrollToListTop();
+  removeChildNodes(listHeader);
+  removeChildNodes(list);
+};
+
+var createListBackButton = function(apiData){
+  var listHeader = document.getElementById('list-header');
+  var backButton = createElement('div', 'resorts-back-button');
+  backButton.innerText = '<';
+  backButton.addEventListener('click', function(){ populateRegionList(apiData); });
+  listHeader.appendChild(backButton);
+};
+
+var createListHeaderText = function(name){
+  var listHeader = document.getElementById('list-header');
+  var listHeaderText = createElement('div', 'list-header-text');
+  listHeaderText.innerText = name;
+  listHeader.appendChild(listHeaderText);
+};
+
+var createListItem = function(heading, parent, id, className, apiData, resort){
+  var item = createElement('div', id, className);
+  var itemHeading = createElement('div', id + '-heading', className + '-heading');
+  itemHeading.innerText = heading;
+  item.appendChild(itemHeading);
+  addListener(item, heading, className, apiData, resort);
+  parent.appendChild(item);
+};
+
+var addListener = function(item, name, className, apiData, resort){
+  if (className === 'region-list-item'){ addRegionListener(item, name, apiData); };
+  if (className === 'resort-list-item'){ addResortListener(item, name, resort); };
+};
+
+var addRegionListener = function(item, name, apiData){
+  item.addEventListener('click', function(){
+    var resortsByRegion = trimDataSet(apiData, name);
+    populateResortList(apiData, resortsByRegion);
+  });
 };
 
 var trimDataSet = function(apiData, region){
@@ -88,63 +133,37 @@ var compareValues = function (key, order='asc') {
   };
 };
 
-var clearListSection = function(){
-  var listHeader = document.getElementById('list-header');
-  var list = document.getElementById('list-container');
-  removeChildNodes(listHeader);
-  removeChildNodes(list);
-};
-
-var createListBackButton = function(apiData){
-  var listHeader = document.getElementById('list-header');
-  var backButton = createElement('div', 'resorts-back-button');
-  backButton.innerText = '<';
-  backButton.addEventListener('click', function(){
-    populateRegionList(apiData);
-  });
-  listHeader.appendChild(backButton);
-};
-
-var createListHeaderText = function(name){
-  var listHeader = document.getElementById('list-header');
-  var listHeaderText = createElement('div', 'list-header-text');
-  listHeaderText.innerText = name;
-  listHeader.appendChild(listHeaderText);
-};
-
-var createListItem = function(innerText, parent, id, className, apiData, resort){
-  var item = createElement('div', id, className);
-  item.innerText = innerText;
-  addListener(item, innerText, className, apiData, resort);
-  parent.appendChild(item);
-};
-
-var addListener = function(item, name, className, apiData, resort){
-  if (className === 'region-list-item'){
-    addRegionListener(item, name, apiData);
-  };
-  if (className === 'resort-list-item'){
-    addResortListener(item, name, resort);
-  };
-};
-
-var addRegionListener = function(item, name, apiData){
-  item.addEventListener('click', function(){
-    console.log('region clicked');
-    var resortsByRegion = trimDataSet(apiData, name);
-    populateResortList(apiData, resortsByRegion);
-  });
-};
-
 var addResortListener = function(item, name, resort){
   item.addEventListener('click', function(){
+    closeWeatherContainers();
     var url = generateWeatherRequestURL(resort);
-    console.log('Weather request url: ', url);
-    makeWeatherRequest(url, weatherRequestComplete);
+    makeWeatherRequest(url, function(){ weatherRequestComplete.call(this, resort); });
     map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
-    // TODO: expand div and show additional resort details
+    simulateMarkerClick(resort);
     // TODO: display link to most recent piste map
   });
+};
+
+var closeWeatherContainers = function(){
+  var listContainer = document.getElementById('list-container');
+  for (var listItem of listContainer.children){
+    if (listItem.children[1] !== undefined){ listItem.removeChild(listItem.childNodes[1]); }
+  }
+}
+
+var simulateMarkerClick = function(resort){
+  map.markers.forEach(function(marker){
+    if ((marker.name === resort.name)){ map.simulateClick(marker); };
+  });
+}
+
+var generateWeatherRequestURL = function(resort){
+  var name = resort.name;
+  var lat = resort.geo_lat;
+  var lng = resort.geo_lng;
+  var reportDays = 3;
+  var url = `https://api.worldweatheronline.com/premium/v1/ski.ashx?key=ebbbfe3e5f59416284e222010170812&q=${lat},${lng}&num_of_days=${reportDays}&includeLocation=no&format=json`;
+  return url;
 };
 
 var makeWeatherRequest = function(url, callback){
@@ -154,30 +173,56 @@ var makeWeatherRequest = function(url, callback){
   request.send();
 };
 
-var generateWeatherRequestURL = function(resort){
-  var name = resort.name;
-  var lat = resort.geo_lat;
-  var lng = resort.geo_lng;
-  var reportDays = 2;
-  console.log("Preparing request for: ", name);
-  var url = `https://api.worldweatheronline.com/premium/v1/ski.ashx?key=ebbbfe3e5f59416284e222010170812&q=${lat},${lng}&num_of_days=${reportDays}&includeLocation=no&format=json`;
-  return url;
-};
-
 var weatherRequestComplete = function(resort){
-  console.log(resort);
   if (this.status !== 200){ return console.log('Weather request failed, this.status: ', this.status); }
   console.log('Weather request successful');
   var jsonString = this.responseText;
   var apiData = JSON.parse(jsonString);
   var weather = apiData.data.weather;
-  console.log(weather);
+  console.log('weather: ', weather);
+  appendWeatherToListItem(resort, weather);
 };
 
-var appendWeatherToListItem = function(item, weather){
-  console.log(item);
-  console.log(weather);
+var appendWeatherToListItem = function(resort, weather){
+  var listItem = document.getElementById(resort.name);
+  var weatherContainer = createElement('section', resort.name + '-weather', 'list-item-weather-container');
+  for (var report of weather){
+    var reportContainer = createElement('div', resort.name + '-weather-' + report.date, 'list-item-weather-report');
+    var date = createElement('h4', undefined, 'list-item-weather-date');
+    var formattedDate = formatDate(report.date);
+    var chanceOfSnow = createElement('h5', undefined, 'list-item-weather-chance-of-snow');
+    var temperaturesContainer = createElement('div', undefined, 'list-item-weather-temperatures');
+    var top = createElement('h5', undefined, 'list-item-weather-top');
+    var mid = createElement('h5', undefined, 'list-item-weather-mid');
+    var bottom = createElement('h5', undefined, 'list-item-weather-bottom');
+
+    date.innerText = formattedDate;
+    chanceOfSnow.innerHTML = `Chance of snow: &nbsp${report.chanceofsnow} %`;
+    top.innerHTML = `Top: &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp${report.top[0].maxtempC} <sup>oC</sup>&nbsp&nbsp&nbsp ${report.top[0].mintempC} <sup>oC</sup>`;
+    mid.innerHTML = `Middle: &nbsp&nbsp&nbsp${report.mid[0].maxtempC} <sup>oC</sup>&nbsp&nbsp&nbsp ${report.mid[0].mintempC} <sup>oC</sup>`;
+    bottom.innerHTML = `Bottom: &nbsp&nbsp${report.bottom[0].maxtempC} <sup>oC</sup>&nbsp&nbsp&nbsp ${report.bottom[0].mintempC} <sup>oC</sup>`;
+
+    reportContainer.appendChild(date);
+    reportContainer.appendChild(chanceOfSnow);
+    temperaturesContainer.appendChild(top);
+    temperaturesContainer.appendChild(mid);
+    temperaturesContainer.appendChild(bottom);
+    reportContainer.appendChild(temperaturesContainer);
+    weatherContainer.appendChild(reportContainer);
+  }
+  listItem.appendChild(weatherContainer);
+  listItem.style.leftPadding = '0px';
+  listItem.style.padding = '10px';
 };
+
+var formatDate = function(dateString){
+  var splitStr = dateString.split('');
+  var day = `${splitStr[8]}${splitStr[9]}`;
+  var month = `${splitStr[5]}${splitStr[6]}`;
+  var year = `${splitStr[0]}${splitStr[1]}${splitStr[2]}${splitStr[3]}`;
+  var newString = `${day}-${month}-${year}`;
+  return newString;
+}
 
 var createElement = function(element, id, className){
   var newElement = document.createElement(element);
@@ -213,7 +258,7 @@ var removeChildNodes = function(node){
 };
 
 var app = function(){
-  console.log('app running');
+  console.log('APP RUNNING');
   var url = "http://localhost:3000/resorts";
   makeRequest(url, dbRequestComplete);
   createMap();
