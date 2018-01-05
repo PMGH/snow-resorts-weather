@@ -84,6 +84,7 @@ MapWrapper.prototype.removeUserMarker = function(){
 
 MapWrapper.prototype.addMarker = function(skiArea){
   var marker = new google.maps.Marker({
+    name: skiArea.name,
     position: skiArea.location,
     infoWindowOpen: false,
     map: this.googleMap
@@ -113,8 +114,14 @@ MapWrapper.prototype.addMarker = function(skiArea){
     }
     marker.infowindow.open(this.googleMap, marker);
     marker.infowindowOpen = true;
+    console.log(marker);
+    console.log(skiArea);
   }.bind(this));
 
 }
+
+MapWrapper.prototype.simulateClick = function(marker){
+  google.maps.event.trigger(marker, "click");
+};
 
 module.exports = MapWrapper;
