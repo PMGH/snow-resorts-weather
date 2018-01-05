@@ -134,24 +134,27 @@ var compareValues = function (key, order='asc') {
 };
 
 var addResortListener = function(item, name, resort){
-  var clicks = 0;
   item.addEventListener('click', function(){
-    if (clicks < 1){
-      clicks += 1;
-      var url = generateWeatherRequestURL(resort);
-      makeWeatherRequest(url, function(){ weatherRequestComplete.call(this, resort); });
-      map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
-      // TODO: display link to most recent piste map
-    }
+    closeWeatherContainers();
+    var url = generateWeatherRequestURL(resort);
+    makeWeatherRequest(url, function(){ weatherRequestComplete.call(this, resort); });
+    map.recenter({ lat: parseFloat(resort.geo_lat), lng: parseFloat(resort.geo_lng) });
+    simulateMarkerClick(resort);
+    // TODO: display link to most recent piste map
   });
 };
 
-// TODO: add expand/collapse functionality to resort list items
 var closeWeatherContainers = function(){
   var listContainer = document.getElementById('list-container');
   for (var listItem of listContainer.children){
-    listItem.children[1].style.display = 'none';
+    if (listItem.children[1] !== undefined){ listItem.removeChild(listItem.childNodes[1]); }
   }
+}
+
+var simulateMarkerClick = function(resort){
+  map.markers.forEach(function(marker){
+    if ((marker.name === resort.name)){ map.simulateClick(marker); };
+  });
 }
 
 var generateWeatherRequestURL = function(resort){
