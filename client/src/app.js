@@ -194,10 +194,10 @@ var appendWeatherToListItem = function(resort, weather){
     var bottom = createElement('h5', undefined, 'list-item-weather-bottom');
 
     date.innerText = formattedDate;
-    chanceOfSnow.innerText = `Chance of snow: ${report.chanceofsnow}%`;
-    top.innerHTML = `Top: ${report.top[0].maxtempC}<sup>oC</sup>, ${report.top[0].mintempC}<sup>oC</sup>`;
-    mid.innerHTML = `Middle: ${report.mid[0].maxtempC}<sup>oC</sup>, ${report.mid[0].mintempC}<sup>oC</sup>`;
-    bottom.innerHTML = `Bottom: ${report.bottom[0].maxtempC}<sup>oC</sup>, ${report.bottom[0].mintempC}<sup>oC</sup>`;
+    chanceOfSnow.innerHTML = `Chance of snow: &nbsp${report.chanceofsnow} %`;
+    top.innerHTML = `Top: &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp${report.top[0].maxtempC} <sup>oC</sup>&nbsp&nbsp&nbsp ${report.top[0].mintempC} <sup>oC</sup>`;
+    mid.innerHTML = `Middle: &nbsp&nbsp&nbsp${report.mid[0].maxtempC} <sup>oC</sup>&nbsp&nbsp&nbsp ${report.mid[0].mintempC} <sup>oC</sup>`;
+    bottom.innerHTML = `Bottom: &nbsp&nbsp${report.bottom[0].maxtempC} <sup>oC</sup>&nbsp&nbsp&nbsp ${report.bottom[0].mintempC} <sup>oC</sup>`;
 
     reportContainer.appendChild(date);
     reportContainer.appendChild(chanceOfSnow);
