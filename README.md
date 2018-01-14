@@ -26,6 +26,11 @@ When a ski area is selected an asynchronous request is sent to the World Weather
 * HTML5 (https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5)  
 * CSS3 (https://developer.mozilla.org/en-US/docs/Web/CSS/CSS3)  
 * JSON (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON)  
+* Express (https://expressjs.com/)  
+* Nodemon (https://nodemon.io/)  
+* Webpack Bundler (https://webpack.js.org/)  
+* Mongo Database (https://docs.mongodb.com/) - localised SkiMap API data to increase performance  
+* Node.js (https://nodejs.org/en/)  
 * SkiMap API (https://skimap.org/pages/Developers)  
 * Google Maps API (https://developers.google.com/maps/documentation/javascript/)  
 * Google Maps Places (https://developers.google.com/places/javascript/)  
